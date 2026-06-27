@@ -23,8 +23,26 @@ const LENGTH_GUIDES = {
   'Very Long': '1200-1800 words for the main letter'
 };
 
+// Retry with exponential backoff for 429 errors
+async function callWithRetry(fn, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const is429 = err.message?.includes('429') || err.status === 429;
+      if (is429 && attempt < maxRetries - 1) {
+        const wait = (attempt + 1) * 8000; // 8s, 16s, 24s
+        logger.warn(`Gemini 429 - retrying in ${wait/1000}s (attempt ${attempt + 1})`);
+        await new Promise(r => setTimeout(r, wait));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 async function generateExperience(data) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
   const styleGuide = STYLE_GUIDES[data.writingStyle] || STYLE_GUIDES.Romantic;
   const lengthGuide = LENGTH_GUIDES[data.letterLength] || LENGTH_GUIDES.Long;
@@ -65,7 +83,7 @@ Generate a complete cinematic romantic experience. Return ONLY valid JSON, no ma
   "letter": "The complete love letter in the chosen style and language. Rich, emotional, specific to their story. No generic lines.",
   "galleryTitle": "A poetic title for their photo gallery section",
   "gallerySubtitle": "A short romantic subtitle for the gallery",
-  "photoCaptions": ["Caption for photo 1 that feels personal and cinematic", "Caption for photo 2", ...],
+  "photoCaptions": ["Caption for photo 1 that feels personal and cinematic", "Caption for photo 2"],
   "endingTitle": "A powerful, emotional ending title",
   "endingMessage": "A beautiful 3-4 sentence closing message that ties everything together emotionally",
   "quote": "A short, powerful romantic quote or line from the letter that could stand alone as art",
@@ -73,26 +91,31 @@ Generate a complete cinematic romantic experience. Return ONLY valid JSON, no ma
   "cta": "A warm invitation line encouraging the recipient to create their own experience on Cymor Love Hub"
 }`;
 
+  const result = await callWithRetry(async () => {
+    const r = await model.generateContent(prompt);
+    return r.response.text();
+  });
+
+  const clean = result.replace(/```json|```/g, '').trim();
+
+  let parsed;
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-
-    // Ensure photoCaptions matches image count
-    if (numPhotos > 0 && (!parsed.photoCaptions || parsed.photoCaptions.length < numPhotos)) {
-      const existing = parsed.photoCaptions || [];
-      while (existing.length < numPhotos) existing.push('A moment frozen in time, beautiful and forever.');
-      parsed.photoCaptions = existing;
-    } else if (numPhotos === 0) {
-      parsed.photoCaptions = [];
-    }
-
-    return parsed;
+    parsed = JSON.parse(clean);
   } catch (err) {
-    logger.error('Gemini generation error:', err);
-    throw new Error('AI generation failed. Please try again.');
+    logger.error('Gemini JSON parse error:', clean.substring(0, 300));
+    throw new Error('AI returned invalid response. Please try again.');
   }
+
+  // Ensure photoCaptions matches image count
+  if (numPhotos > 0) {
+    const existing = parsed.photoCaptions || [];
+    while (existing.length < numPhotos) existing.push('A moment frozen in time, beautiful and forever.');
+    parsed.photoCaptions = existing.slice(0, numPhotos);
+  } else {
+    parsed.photoCaptions = [];
+  }
+
+  return parsed;
 }
 
 module.exports = { generateExperience };
