@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cymor Love Hub — AI Cinematic Romantic Experiences</title>
+  <meta name="description" content="Transform your love story into a cinematic experience. AI-powered romantic letters with music, photos, and animations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/landing.css" />
+</head>
+<body>
+
+<!-- Ambient canvas -->
+<canvas id="auroraCanvas"></canvas>
+<div id="petalsContainer"></div>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Cymor Love Hub</a>
+    <a href="/create" class="nav-cta">Create Experience</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <p class="hero-eyebrow">AI · Music · Cinema · Love</p>
+    <h1 class="hero-title">
+      Your love story<br/>
+      <em>deserves a film.</em>
+    </h1>
+    <p class="hero-sub">
+      Not just a letter. A cinematic experience — with music, photos, and AI-crafted words
+      that make your person feel everything, all at once.
+    </p>
+    <a href="/create" class="btn-primary">Begin Your Story</a>
+    <p class="hero-note">Free · Ready in minutes · Lasts 90 days</p>
+  </div>
+  <div class="hero-preview">
+    <div class="preview-phone">
+      <div class="preview-screen">
+        <div class="preview-glow"></div>
+        <div class="preview-name">For Sarah...</div>
+        <div class="preview-text">Every morning I wake up and choose you again...</div>
+        <div class="preview-heart">♥</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <p class="section-eyebrow">How it works</p>
+    <h2 class="section-title">Three steps to wonder</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">I</div>
+        <h3>Tell your story</h3>
+        <p>Share your memories, moments, nicknames, dreams. The more you give, the more personal the experience becomes.</p>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-num">II</div>
+        <h3>AI crafts the magic</h3>
+        <p>Gemini weaves your story into a cinematic script — unique title, intro, letter, captions, ending — nothing generic, ever.</p>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-num">III</div>
+        <h3>They experience wonder</h3>
+        <p>One link. A cinematic sequence unfolds — black screen, their name in gold, music, photos, typewriter letter. A film for two.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THEMES -->
+<section class="themes" id="themes">
+  <div class="container">
+    <p class="section-eyebrow">Themes</p>
+    <h2 class="section-title">Choose your aesthetic</h2>
+    <div class="themes-grid">
+      <div class="theme-card theme-rose" data-theme="Rose Garden">
+        <div class="theme-preview"></div>
+        <span>Rose Garden</span>
+      </div>
+      <div class="theme-card theme-gold" data-theme="Golden Romance">
+        <div class="theme-preview"></div>
+        <span>Golden Romance</span>
+      </div>
+      <div class="theme-card theme-cherry" data-theme="Cherry Blossom">
+        <div class="theme-preview"></div>
+        <span>Cherry Blossom</span>
+      </div>
+      <div class="theme-card theme-midnight" data-theme="Midnight Sky">
+        <div class="theme-preview"></div>
+        <span>Midnight Sky</span>
+      </div>
+      <div class="theme-card theme-royal" data-theme="Royal Gold">
+        <div class="theme-preview"></div>
+        <span>Royal Gold</span>
+      </div>
+      <div class="theme-card theme-ocean" data-theme="Ocean Love">
+        <div class="theme-preview"></div>
+        <span>Ocean Love</span>
+      </div>
+      <div class="theme-card theme-minimal" data-theme="Minimal Luxury">
+        <div class="theme-preview"></div>
+        <span>Minimal Luxury</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <p class="section-eyebrow">What makes it different</p>
+    <h2 class="section-title">Not a letter. A moment.</h2>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">✦</div>
+        <h3>Cinematic opening</h3>
+        <p>Black screen, silence, then their name appears letter by letter in gold. The opening sequence of a film just for them.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">♪</div>
+        <h3>Music that sets the mood</h3>
+        <p>Upload your song, or choose from romantic built-in tracks. It plays automatically as the experience unfolds.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">◈</div>
+        <h3>Up to 10 photos</h3>
+        <p>Your photos crossfade with Ken Burns zoom effects as the letter types itself. A slideshow and a love letter, combined.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✧</div>
+        <h3>AI-crafted, never generic</h3>
+        <p>Every title, intro, caption, and ending is generated uniquely for your story. No two experiences are ever alike.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">❋</div>
+        <h3>9 writing styles</h3>
+        <p>Romantic, Poetic, Proposal, Apology, Long Distance, Funny, Cute, Elegant, Anniversary — the mood you need.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">◉</div>
+        <h3>7 languages</h3>
+        <p>Generate in English, Swahili, French, Spanish, Italian, German, or Portuguese. Love transcends language.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <p class="section-eyebrow">Stories</p>
+    <h2 class="section-title">What they felt</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <p class="testimonial-text">"She cried for ten minutes. Said it felt like watching a movie about us. I've never made her feel so seen."</p>
+        <p class="testimonial-author">— David, Nairobi</p>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">"I sent it for our anniversary. He called me immediately, speechless. The music and photos together — it was everything."</p>
+        <p class="testimonial-author">— Amina, Lagos</p>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">"I used the Apology style after a big fight. The AI understood exactly what I was feeling. We're stronger now."</p>
+        <p class="testimonial-author">— James, London</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="container">
+    <p class="section-eyebrow">FAQ</p>
+    <h2 class="section-title">Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How long does generation take? <span>+</span></button>
+        <div class="faq-a">Usually 15–30 seconds. The AI reads everything you've shared and crafts a completely unique experience.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Can I preview before sharing? <span>+</span></button>
+        <div class="faq-a">Yes — after generation you'll see the full shareable link. Open it yourself first to experience what they'll see.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How long does the link last? <span>+</span></button>
+        <div class="faq-a">90 days. After that, the experience is automatically removed from our servers.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Is it free? <span>+</span></button>
+        <div class="faq-a">Yes, completely free during our launch period. Create as many experiences as you like.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Are my photos private? <span>+</span></button>
+        <div class="faq-a">Your photos are stored securely and only accessible via the unique link you share. We never use them for anything else.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <div class="cta-petals"></div>
+      <h2>Someone is waiting<br/>to feel everything.</h2>
+      <p>Give them more than words. Give them a moment they'll never forget.</p>
+      <a href="/create" class="btn-primary btn-large">Create Your Experience</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <p class="footer-logo">Cymor Love Hub</p>
+    <p class="footer-tagline">Making love unforgettable, one experience at a time.</p>
+    <p class="footer-copy">© 2025 Cymor Tech Services. Built with love in Kenya.</p>
+  </div>
+</footer>
+
+<script src="/js/landing.js"></script>
+</body>
+</html>

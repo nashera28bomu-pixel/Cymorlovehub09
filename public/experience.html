@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Love Experience — Cymor Love Hub</title>
+  <meta name="description" content="Someone created a cinematic romantic experience just for you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/experience.css" />
+</head>
+<body class="theme-rose">
+
+<!-- Error state -->
+<div id="errorScreen" class="error-screen" style="display:none">
+  <div class="error-wrap">
+    <div class="error-icon">♥</div>
+    <h1 id="errorTitle">Experience not found</h1>
+    <p id="errorMsg">This experience may have expired or the link may be incorrect.</p>
+    <a href="/" class="btn-home">Create Your Own →</a>
+  </div>
+</div>
+
+<!-- LOADING STATE -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-petals"></div>
+  <div class="loading-icon">♥</div>
+</div>
+
+<!-- AUDIO PLAYER (hidden) -->
+<audio id="bgMusic" loop></audio>
+
+<!-- EXPERIENCE WRAPPER -->
+<div id="experienceWrapper" style="display:none">
+
+  <!-- CANVAS for particles -->
+  <canvas id="particleCanvas"></canvas>
+  <div id="petalLayer"></div>
+
+  <!-- ── SCENE 1: BLACK INTRO ── -->
+  <div class="scene" id="scene-intro">
+    <div class="intro-stars" id="introStars"></div>
+    <div class="intro-glow"></div>
+    <div class="intro-name-wrap">
+      <p class="intro-for">with love,</p>
+      <h1 class="intro-name" id="introName"></h1>
+    </div>
+    <div class="intro-from" id="introFrom"></div>
+    <div class="intro-continue" id="introContinue">
+      <button class="btn-begin" onclick="beginExperience()">Open Your Letter ♥</button>
+    </div>
+  </div>
+
+  <!-- ── SCENE 2: MAIN EXPERIENCE ── -->
+  <div class="scene" id="scene-main" style="display:none">
+
+    <!-- PHOTO BACKGROUND SLIDESHOW -->
+    <div class="photo-bg" id="photoBg">
+      <div class="photo-slide active" id="photoSlide0"></div>
+      <div class="photo-slide" id="photoSlide1"></div>
+    </div>
+    <div class="bg-overlay"></div>
+
+    <!-- EXPERIENCE CONTENT -->
+    <div class="experience-scroll" id="experienceScroll">
+
+      <!-- OPENING -->
+      <div class="exp-section section-opening reveal-section">
+        <div class="exp-inner">
+          <div class="opening-ornament">✦</div>
+          <h1 class="exp-title" id="expTitle"></h1>
+          <p class="exp-intro" id="expIntro"></p>
+        </div>
+      </div>
+
+      <!-- LETTER SECTION -->
+      <div class="exp-section section-letter reveal-section">
+        <div class="exp-inner letter-inner">
+          <div class="letter-header">
+            <div class="letter-ornament">❦</div>
+          </div>
+          <div class="letter-body" id="letterBody"></div>
+          <div class="letter-signature" id="letterSignature"></div>
+        </div>
+      </div>
+
+      <!-- GALLERY SECTION (only if photos) -->
+      <div class="exp-section section-gallery reveal-section" id="gallerySection" style="display:none">
+        <div class="exp-inner">
+          <h2 class="gallery-title" id="galleryTitle"></h2>
+          <p class="gallery-subtitle" id="gallerySubtitle"></p>
+          <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+      </div>
+
+      <!-- QUOTE SECTION -->
+      <div class="exp-section section-quote reveal-section">
+        <div class="exp-inner">
+          <blockquote class="exp-quote" id="expQuote"></blockquote>
+        </div>
+      </div>
+
+      <!-- ENDING SECTION -->
+      <div class="exp-section section-ending reveal-section">
+        <div class="exp-inner">
+          <div class="ending-hearts">
+            <span class="ending-heart">♥</span>
+            <span class="ending-heart">♥</span>
+            <span class="ending-heart">♥</span>
+          </div>
+          <h2 class="ending-title" id="endingTitle"></h2>
+          <p class="ending-message" id="endingMessage"></p>
+        </div>
+      </div>
+
+      <!-- CTA FOOTER -->
+      <div class="exp-section section-cta">
+        <div class="exp-inner cta-inner">
+          <p class="exp-cta-text" id="expCta"></p>
+          <a href="/create" class="btn-create-own">Create Your Own Experience ♥</a>
+          <p class="powered-by">Made with <span style="color:var(--accent)">♥</span> on Cymor Love Hub</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- REACTION BAR -->
+    <div class="reaction-bar" id="reactionBar">
+      <button class="reaction-btn" onclick="react('❤️')">❤️</button>
+      <button class="reaction-btn" onclick="react('😭')">😭</button>
+      <button class="reaction-btn" onclick="react('💕')">💕</button>
+      <button class="reaction-btn" onclick="react('✨')">✨</button>
+      <button class="reaction-btn" onclick="react('🥺')">🥺</button>
+    </div>
+
+    <!-- MUSIC CONTROL -->
+    <button class="music-toggle" id="musicToggle" onclick="toggleMusic()" title="Toggle music">♪</button>
+
+  </div>
+</div>
+
+<script src="/js/experience.js"></script>
+</body>
+</html>
