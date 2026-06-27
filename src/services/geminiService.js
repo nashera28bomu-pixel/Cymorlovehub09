@@ -3,6 +3,14 @@ const { logger } = require('../utils/logger');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Fallback chain — all free, tries in order until one works
+const MODEL_CHAIN = [
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash-8b',
+];
+
 const STYLE_GUIDES = {
   Romantic: 'deeply romantic, heartfelt, passionate, and tender',
   Poetic: 'lyrical, metaphor-rich, poetic with beautiful imagery and rhythm',
@@ -23,32 +31,13 @@ const LENGTH_GUIDES = {
   'Very Long': '1200-1800 words for the main letter'
 };
 
-// Retry with exponential backoff for 429 errors
-async function callWithRetry(fn, maxRetries = 3) {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      const is429 = err.message?.includes('429') || err.status === 429;
-      if (is429 && attempt < maxRetries - 1) {
-        const wait = (attempt + 1) * 8000; // 8s, 16s, 24s
-        logger.warn(`Gemini 429 - retrying in ${wait/1000}s (attempt ${attempt + 1})`);
-        await new Promise(r => setTimeout(r, wait));
-        continue;
-      }
-      throw err;
-    }
-  }
-}
-
-async function generateExperience(data) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
-
+function buildPrompt(data) {
   const styleGuide = STYLE_GUIDES[data.writingStyle] || STYLE_GUIDES.Romantic;
   const lengthGuide = LENGTH_GUIDES[data.letterLength] || LENGTH_GUIDES.Long;
   const numPhotos = data.images?.length || 0;
 
-  const prompt = `You are a master romantic storyteller and screenwriter creating a deeply personal cinematic love experience.
+  return {
+    prompt: `You are a master romantic storyteller creating a deeply personal cinematic love experience.
 
 RECIPIENT: ${data.recipientName}
 SENDER: ${data.senderName}
@@ -65,7 +54,7 @@ ${data.loveMost ? `What sender loves most: ${data.loveMost}` : ''}
 ${data.favoriteMemory ? `Favorite memory: ${data.favoriteMemory}` : ''}
 ${data.secretThings ? `Things only they know: ${data.secretThings}` : ''}
 ${data.specialMoments ? `Special moments: ${data.specialMoments}` : ''}
-${data.futureDreamsTogether ? `Future dreams together: ${data.futureDreamsTogether}` : ''}
+${data.futureDreamsTogether ? `Future dreams: ${data.futureDreamsTogether}` : ''}
 ${data.funnyMemory ? `Funny memory: ${data.funnyMemory}` : ''}
 ${data.promises ? `Promises: ${data.promises}` : ''}
 ${data.extraDetails ? `Extra: ${data.extraDetails}` : ''}
@@ -73,49 +62,76 @@ ${data.extraDetails ? `Extra: ${data.extraDetails}` : ''}
 WRITING STYLE: ${styleGuide}
 LENGTH: ${lengthGuide}
 LANGUAGE: ${data.language || 'English'}
-NUMBER OF PHOTOS: ${numPhotos} (generate exactly ${numPhotos} photo captions if photos exist, otherwise empty array)
+PHOTOS: ${numPhotos}
 
-Generate a complete cinematic romantic experience. Return ONLY valid JSON, no markdown, no explanation.
-
+Return ONLY valid JSON, no markdown, no explanation:
 {
-  "title": "A cinematic, poetic title for this love story (not generic, deeply personal to their story)",
-  "intro": "A beautiful 2-3 sentence cinematic introduction that appears before the letter. Should feel like the opening of a romantic film.",
-  "letter": "The complete love letter in the chosen style and language. Rich, emotional, specific to their story. No generic lines.",
-  "galleryTitle": "A poetic title for their photo gallery section",
-  "gallerySubtitle": "A short romantic subtitle for the gallery",
-  "photoCaptions": ["Caption for photo 1 that feels personal and cinematic", "Caption for photo 2"],
-  "endingTitle": "A powerful, emotional ending title",
-  "endingMessage": "A beautiful 3-4 sentence closing message that ties everything together emotionally",
-  "quote": "A short, powerful romantic quote or line from the letter that could stand alone as art",
-  "signature": "A warm, personal sign-off from ${data.senderName} to ${data.recipientName}",
-  "cta": "A warm invitation line encouraging the recipient to create their own experience on Cymor Love Hub"
-}`;
+  "title": "cinematic poetic title personal to their story",
+  "intro": "2-3 sentence cinematic opening like a romantic film",
+  "letter": "complete love letter in chosen style and language",
+  "galleryTitle": "poetic gallery title",
+  "gallerySubtitle": "short romantic gallery subtitle",
+  "photoCaptions": ${numPhotos > 0 ? `["caption 1", "caption 2" ... exactly ${numPhotos} captions]` : '[]'},
+  "endingTitle": "powerful emotional ending title",
+  "endingMessage": "3-4 sentence closing message",
+  "quote": "short powerful quote from the letter",
+  "signature": "warm sign-off from ${data.senderName}",
+  "cta": "warm invitation to create their own experience on Cymor Love Hub"
+}`,
+    numPhotos
+  };
+}
 
-  const result = await callWithRetry(async () => {
-    const r = await model.generateContent(prompt);
-    return r.response.text();
-  });
+async function tryModel(modelName, prompt) {
+  const model = genAI.getGenerativeModel({ model: modelName });
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+}
 
-  const clean = result.replace(/```json|```/g, '').trim();
+async function generateExperience(data) {
+  const { prompt, numPhotos } = buildPrompt(data);
+  let lastError = null;
 
-  let parsed;
-  try {
-    parsed = JSON.parse(clean);
-  } catch (err) {
-    logger.error('Gemini JSON parse error:', clean.substring(0, 300));
-    throw new Error('AI returned invalid response. Please try again.');
+  for (const modelName of MODEL_CHAIN) {
+    try {
+      logger.info(`Trying Gemini model: ${modelName}`);
+      const text = await tryModel(modelName, prompt);
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      // Ensure photoCaptions length matches
+      if (numPhotos > 0) {
+        const caps = parsed.photoCaptions || [];
+        while (caps.length < numPhotos) caps.push('A beautiful moment, forever remembered.');
+        parsed.photoCaptions = caps.slice(0, numPhotos);
+      } else {
+        parsed.photoCaptions = [];
+      }
+
+      logger.info(`Success with model: ${modelName}`);
+      return parsed;
+
+    } catch (err) {
+      const msg = err.message || '';
+      const isRetryable = msg.includes('503') || msg.includes('429') || msg.includes('overloaded') || msg.includes('unavailable');
+
+      logger.warn(`Model ${modelName} failed: ${msg.substring(0, 120)}`);
+      lastError = err;
+
+      if (isRetryable) {
+        // Small wait before trying next model
+        await new Promise(r => setTimeout(r, 2000));
+        continue;
+      }
+
+      // Non-retryable error (404, auth, bad JSON) — still try next model
+      continue;
+    }
   }
 
-  // Ensure photoCaptions matches image count
-  if (numPhotos > 0) {
-    const existing = parsed.photoCaptions || [];
-    while (existing.length < numPhotos) existing.push('A moment frozen in time, beautiful and forever.');
-    parsed.photoCaptions = existing.slice(0, numPhotos);
-  } else {
-    parsed.photoCaptions = [];
-  }
-
-  return parsed;
+  // All models failed
+  logger.error('All Gemini models failed. Last error:', lastError?.message);
+  throw new Error('Our AI is experiencing high demand right now. Please try again in a minute.');
 }
 
 module.exports = { generateExperience };
