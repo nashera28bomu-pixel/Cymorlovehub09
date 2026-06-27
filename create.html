@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Experience — Cymor Love Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/create.css" />
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Cymor Love Hub</a>
+    <div class="nav-steps">
+      <span class="nav-step active" data-step="1">Details</span>
+      <span class="nav-divider">·</span>
+      <span class="nav-step" data-step="2">Story</span>
+      <span class="nav-divider">·</span>
+      <span class="nav-step" data-step="3">Style</span>
+      <span class="nav-divider">·</span>
+      <span class="nav-step" data-step="4">Media</span>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- STEP 1: RELATIONSHIP DETAILS -->
+  <section class="step-section active" id="step-1">
+    <div class="step-header">
+      <p class="step-eyebrow">Step 1 of 4</p>
+      <h1 class="step-title">Who is this for?</h1>
+      <p class="step-sub">Tell us about you and the person who will receive this experience.</p>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="senderName">Your name *</label>
+        <input type="text" id="senderName" placeholder="Your name" required />
+      </div>
+      <div class="field">
+        <label for="recipientName">Their name *</label>
+        <input type="text" id="recipientName" placeholder="Their name" required />
+      </div>
+      <div class="field">
+        <label for="nickname">Nickname or pet name</label>
+        <input type="text" id="nickname" placeholder="e.g. Sunshine, My love" />
+      </div>
+      <div class="field">
+        <label for="occasion">Occasion</label>
+        <select id="occasion">
+          <option value="Love Letter">Love Letter</option>
+          <option value="Anniversary">Anniversary</option>
+          <option value="Birthday">Birthday</option>
+          <option value="Proposal">Proposal</option>
+          <option value="Apology">Apology</option>
+          <option value="Valentine's Day">Valentine's Day</option>
+          <option value="Long Distance">Long Distance</option>
+          <option value="Just Because">Just Because</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="relationshipDuration">How long have you been together?</label>
+        <input type="text" id="relationshipDuration" placeholder="e.g. 3 years, 8 months" />
+      </div>
+      <div class="field">
+        <label for="favoritePlace">Your favorite place together</label>
+        <input type="text" id="favoritePlace" placeholder="e.g. That little café in Westlands" />
+      </div>
+      <div class="field">
+        <label for="firstDate">When / where was your first date?</label>
+        <input type="text" id="firstDate" placeholder="e.g. July 2022, that rooftop in town" />
+      </div>
+      <div class="field">
+        <label for="futureDream">A dream you share for the future</label>
+        <input type="text" id="futureDream" placeholder="e.g. Moving to the coast, starting a family" />
+      </div>
+    </div>
+    <div class="step-actions">
+      <button class="btn-next" onclick="goToStep(2)">Continue — Tell the Story →</button>
+    </div>
+  </section>
+
+  <!-- STEP 2: STORY -->
+  <section class="step-section" id="step-2">
+    <div class="step-header">
+      <p class="step-eyebrow">Step 2 of 4</p>
+      <h1 class="step-title">Your story</h1>
+      <p class="step-sub">The more you share, the more personal and powerful the experience becomes. Fill in what feels right.</p>
+    </div>
+    <div class="story-fields">
+      <div class="field full">
+        <label for="howMet">How did you meet? *</label>
+        <textarea id="howMet" rows="3" placeholder="Tell the story of how you two found each other..." required></textarea>
+      </div>
+      <div class="field full">
+        <label for="loveMost">What do you love most about them?</label>
+        <textarea id="loveMost" rows="3" placeholder="The specific things that make them extraordinary to you..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="favoriteMemory">Your favorite shared memory</label>
+        <textarea id="favoriteMemory" rows="3" placeholder="Paint the scene — where you were, what happened, how it felt..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="secretThings">Things only the two of you know</label>
+        <textarea id="secretThings" rows="3" placeholder="Inside jokes, private rituals, secret languages..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="specialMoments">Special moments to capture</label>
+        <textarea id="specialMoments" rows="3" placeholder="Moments you never want to forget..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="futureDreamsTogether">Your dreams together</label>
+        <textarea id="futureDreamsTogether" rows="3" placeholder="The life you're building, the adventures ahead..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="funnyMemory">A funny memory</label>
+        <textarea id="funnyMemory" rows="2" placeholder="Something that still makes you both laugh..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="promises">Promises you want to make</label>
+        <textarea id="promises" rows="2" placeholder="Commitments from your heart..."></textarea>
+      </div>
+      <div class="field full">
+        <label for="extraDetails">Anything else the AI should know</label>
+        <textarea id="extraDetails" rows="2" placeholder="Extra context, specific words they use, places that matter..."></textarea>
+      </div>
+    </div>
+    <div class="step-actions">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-next" onclick="goToStep(3)">Continue — Choose Your Style →</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: STYLE & THEME -->
+  <section class="step-section" id="step-3">
+    <div class="step-header">
+      <p class="step-eyebrow">Step 3 of 4</p>
+      <h1 class="step-title">Style & theme</h1>
+      <p class="step-sub">Choose how the AI will write and how the experience will look and sound.</p>
+    </div>
+
+    <div class="style-group">
+      <h2 class="style-label">Writing style</h2>
+      <div class="style-grid" id="writingStyleGrid">
+        <div class="style-chip selected" data-val="Romantic">Romantic</div>
+        <div class="style-chip" data-val="Poetic">Poetic</div>
+        <div class="style-chip" data-val="Deep Emotional">Deep Emotional</div>
+        <div class="style-chip" data-val="Funny">Funny & Warm</div>
+        <div class="style-chip" data-val="Cute">Cute</div>
+        <div class="style-chip" data-val="Elegant">Elegant</div>
+        <div class="style-chip" data-val="Proposal">Proposal 💍</div>
+        <div class="style-chip" data-val="Anniversary">Anniversary</div>
+        <div class="style-chip" data-val="Apology">Apology</div>
+        <div class="style-chip" data-val="Long Distance">Long Distance 🌏</div>
+      </div>
+    </div>
+
+    <div class="style-group">
+      <h2 class="style-label">Letter length</h2>
+      <div class="style-grid" id="letterLengthGrid">
+        <div class="style-chip" data-val="Short">Short</div>
+        <div class="style-chip selected" data-val="Medium">Medium</div>
+        <div class="style-chip" data-val="Long">Long</div>
+        <div class="style-chip" data-val="Very Long">Very Long</div>
+      </div>
+    </div>
+
+    <div class="style-group">
+      <h2 class="style-label">Language</h2>
+      <div class="style-grid" id="languageGrid">
+        <div class="style-chip selected" data-val="English">English</div>
+        <div class="style-chip" data-val="Swahili">Swahili</div>
+        <div class="style-chip" data-val="French">Français</div>
+        <div class="style-chip" data-val="Spanish">Español</div>
+        <div class="style-chip" data-val="Italian">Italiano</div>
+        <div class="style-chip" data-val="German">Deutsch</div>
+        <div class="style-chip" data-val="Portuguese">Português</div>
+      </div>
+    </div>
+
+    <div class="style-group">
+      <h2 class="style-label">Theme</h2>
+      <div class="themes-row" id="themeGrid">
+        <div class="theme-opt selected" data-val="Rose Garden">
+          <div class="theme-swatch theme-rose"></div>
+          <span>Rose Garden</span>
+        </div>
+        <div class="theme-opt" data-val="Golden Romance">
+          <div class="theme-swatch theme-gold"></div>
+          <span>Golden Romance</span>
+        </div>
+        <div class="theme-opt" data-val="Cherry Blossom">
+          <div class="theme-swatch theme-cherry"></div>
+          <span>Cherry Blossom</span>
+        </div>
+        <div class="theme-opt" data-val="Midnight Sky">
+          <div class="theme-swatch theme-midnight"></div>
+          <span>Midnight Sky</span>
+        </div>
+        <div class="theme-opt" data-val="Royal Gold">
+          <div class="theme-swatch theme-royal"></div>
+          <span>Royal Gold</span>
+        </div>
+        <div class="theme-opt" data-val="Ocean Love">
+          <div class="theme-swatch theme-ocean"></div>
+          <span>Ocean Love</span>
+        </div>
+        <div class="theme-opt" data-val="Minimal Luxury">
+          <div class="theme-swatch theme-minimal"></div>
+          <span>Minimal Luxury</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-actions">
+      <button class="btn-back" onclick="goToStep(2)">← Back</button>
+      <button class="btn-next" onclick="goToStep(4)">Continue — Add Photos & Music →</button>
+    </div>
+  </section>
+
+  <!-- STEP 4: MEDIA -->
+  <section class="step-section" id="step-4">
+    <div class="step-header">
+      <p class="step-eyebrow">Step 4 of 4</p>
+      <h1 class="step-title">Photos & music</h1>
+      <p class="step-sub">Add up to 10 photos and choose the soundtrack for your experience.</p>
+    </div>
+
+    <!-- Photos -->
+    <div class="media-section">
+      <h2 class="style-label">Your photos (optional, up to 10)</h2>
+      <div class="upload-zone" id="photoZone">
+        <input type="file" id="photoInput" multiple accept="image/*" style="display:none" />
+        <div class="upload-icon">◈</div>
+        <p>Tap to add photos</p>
+        <p class="upload-sub">JPG, PNG, WEBP · Max 10MB each</p>
+      </div>
+      <div class="photo-previews" id="photoPreviews"></div>
+    </div>
+
+    <!-- Music -->
+    <div class="media-section">
+      <h2 class="style-label">Music</h2>
+      <div class="music-tabs">
+        <button class="music-tab active" id="tab-builtin" onclick="switchMusicTab('builtin')">Built-in tracks</button>
+        <button class="music-tab" id="tab-upload" onclick="switchMusicTab('upload')">Upload your song</button>
+      </div>
+
+      <div class="music-panel active" id="panel-builtin">
+        <div class="music-grid" id="musicGrid">
+          <div class="music-chip selected" data-val="soft-piano">
+            <span class="music-icon">♪</span>
+            <span>Soft Piano</span>
+          </div>
+          <div class="music-chip" data-val="romantic-strings">
+            <span class="music-icon">♫</span>
+            <span>Romantic Strings</span>
+          </div>
+          <div class="music-chip" data-val="golden-sunset">
+            <span class="music-icon">✦</span>
+            <span>Golden Sunset</span>
+          </div>
+          <div class="music-chip" data-val="moonlight">
+            <span class="music-icon">◉</span>
+            <span>Moonlight</span>
+          </div>
+          <div class="music-chip" data-val="rain-dance">
+            <span class="music-icon">·</span>
+            <span>Rain Dance</span>
+          </div>
+          <div class="music-chip" data-val="acoustic-love">
+            <span class="music-icon">❋</span>
+            <span>Acoustic Love</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="music-panel" id="panel-upload">
+        <div class="upload-zone" id="musicZone">
+          <input type="file" id="musicInput" accept="audio/*" style="display:none" />
+          <div class="upload-icon">♪</div>
+          <p>Tap to upload your song</p>
+          <p class="upload-sub">MP3, WAV · Max 15MB</p>
+        </div>
+        <div id="musicFileName" class="music-file-name"></div>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <div class="generate-area">
+      <div class="generate-hint">
+        <span class="hint-icon">✦</span>
+        The AI will read everything you've shared and craft a completely unique experience. This takes 15–30 seconds.
+      </div>
+      <button class="btn-generate" id="generateBtn" onclick="generateExperience()">
+        <span id="generateText">✦ Generate My Experience</span>
+        <div class="btn-spinner" id="generateSpinner" style="display:none"></div>
+      </button>
+      <div id="generateError" class="generate-error"></div>
+    </div>
+
+    <div class="step-actions" style="justify-content:flex-start;">
+      <button class="btn-back" onclick="goToStep(3)">← Back</button>
+    </div>
+  </section>
+
+  <!-- SUCCESS -->
+  <section class="step-section" id="step-success">
+    <div class="success-wrap">
+      <div class="success-heart">♥</div>
+      <h1 class="success-title">Your experience is ready</h1>
+      <p class="success-sub">Copy the link below and send it to the person you love.</p>
+      <div class="share-box">
+        <input type="text" id="shareUrl" readonly />
+        <button class="btn-copy" id="copyBtn" onclick="copyLink()">Copy Link</button>
+      </div>
+      <p class="share-note">This link works on any device. It expires in 90 days.</p>
+      <a href="#" id="previewBtn" target="_blank" class="btn-preview">Open Experience →</a>
+      <a href="/create" class="btn-another">Create Another</a>
+    </div>
+  </section>
+
+</main>
+
+<script src="/js/create.js"></script>
+</body>
+</html>
