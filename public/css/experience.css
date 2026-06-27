@@ -679,3 +679,31 @@ html, body {
   #petalLayer { display: none; }
   #particleCanvas { display: none; }
 }
+
+/* ── SIGNATURE ENHANCEMENT ── */
+.letter-signature {
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  transform: translateY(10px);
+  transition: opacity 1.2s ease, transform 1.2s ease !important;
+}
+
+.letter-signature.revealed {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ── TYPEWRITER TEXT PRESERVES WHITESPACE ── */
+#typewriterText {
+  white-space: pre-wrap;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-weight: 300;
+  line-height: 2;
+  color: var(--text);
+}
+
+/* ── CTA SECTION SMOOTH ENTRY ── */
+.section-cta {
+  transition: opacity 1.2s ease;
+}
