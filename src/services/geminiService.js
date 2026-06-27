@@ -24,7 +24,7 @@ const LENGTH_GUIDES = {
 };
 
 async function generateExperience(data) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const styleGuide = STYLE_GUIDES[data.writingStyle] || STYLE_GUIDES.Romantic;
   const lengthGuide = LENGTH_GUIDES[data.letterLength] || LENGTH_GUIDES.Long;
