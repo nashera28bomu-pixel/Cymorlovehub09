@@ -33,6 +33,15 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.ht
 app.get('/create', (req, res) => res.sendFile(path.join(__dirname, 'public', 'create.html')));
 app.get('/l/:id', (req, res) => res.sendFile(path.join(__dirname, 'public', 'experience.html')));
 
+// Global error handler — always return JSON for /api routes
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error:', err);
+  if (req.path.startsWith('/api')) {
+    return res.status(500).json({ error: err.message || 'Something went wrong. Please try again.' });
+  }
+  res.status(500).send('Server error');
+});
+
 // Connect DB then start
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
