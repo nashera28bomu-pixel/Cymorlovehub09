@@ -1,0 +1,49 @@
+/* FEATURE PAGES SHARED CSS */
+.page-wrap{max-width:800px;margin:0 auto;padding:100px 24px 80px;position:relative;z-index:2}
+.page-head{text-align:center;margin-bottom:52px}
+.page-icon{font-size:2.8rem;display:block;margin-bottom:20px}
+.page-title{font-family:var(--fd);font-size:clamp(2.2rem,5vw,3.5rem);font-weight:300;color:var(--cream);margin-bottom:12px;line-height:1.1}
+.page-sub{font-size:.9rem;color:var(--muted);line-height:1.75;max-width:500px;margin:0 auto}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r24);padding:40px 36px;margin-bottom:24px}
+.form-card h3{font-family:var(--fd);font-size:1.3rem;font-weight:400;color:var(--cream);margin-bottom:24px}
+.form-stack{display:flex;flex-direction:column;gap:18px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.submit-area{text-align:center;padding-top:8px}
+/* QUIZ SPECIFIC */
+.quiz-progress{display:flex;gap:4px;margin-bottom:32px}
+.quiz-bar{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .4s}
+.quiz-bar.done{background:var(--gold)}
+.quiz-q{font-family:var(--fd);font-size:1.15rem;font-weight:300;color:var(--cream);margin-bottom:20px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:10px}
+.quiz-opt{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r12);padding:14px 18px;cursor:pointer;font-size:.88rem;color:var(--text);transition:all .2s;text-align:left}
+.quiz-opt:hover{border-color:var(--gold);color:var(--gold)}
+.quiz-opt.picked{border-color:var(--gold);background:var(--gold-pale);color:var(--gold)}
+.person-tag{font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:block}
+/* TIMELINE SPECIFIC */
+.milestone-list{display:flex;flex-direction:column;gap:14px;margin-bottom:16px}
+.milestone-item{display:grid;grid-template-columns:140px 1fr auto;gap:10px;align-items:start;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r12);padding:14px}
+.milestone-rm{background:none;border:none;color:var(--error);font-size:1.1rem;cursor:pointer;padding:4px;flex-shrink:0;margin-top:2px}
+.btn-add-milestone{background:none;border:1px dashed var(--border);border-radius:var(--r12);padding:12px;width:100%;color:var(--muted);font-size:.82rem;cursor:pointer;transition:all .2s;font-family:var(--fb)}
+.btn-add-milestone:hover{border-color:var(--gold);color:var(--gold)}
+/* COUPLE NAME SPECIFIC */
+.couple-result{text-align:center;padding:40px 24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r24);margin-top:24px;display:none}
+.couple-names-display{font-family:var(--fs);font-size:clamp(2.5rem,8vw,5rem);color:var(--gold);text-shadow:0 0 30px rgba(201,168,76,.3);margin:16px 0;line-height:1.1;animation:shimmer 3s ease-in-out infinite alternate}
+@keyframes shimmer{from{text-shadow:0 0 20px rgba(201,168,76,.3)}to{text-shadow:0 0 40px rgba(201,168,76,.7),0 0 60px rgba(201,168,76,.2)}}
+.couple-meaning{font-family:var(--fd);font-style:italic;font-size:1rem;color:var(--muted);line-height:1.8;max-width:480px;margin:0 auto 24px}
+.couple-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:24px}
+.couple-opt{padding:10px 20px;border-radius:var(--r40);border:1px solid var(--border);font-size:.85rem;color:var(--muted);cursor:pointer;transition:all .2s;background:var(--surface2)}
+.couple-opt:hover,.couple-opt.active{border-color:var(--gold);color:var(--gold);background:var(--gold-pale)}
+/* PLAYLIST RESULT */
+.playlist-result{display:none;margin-top:24px}
+.playlist-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r24);padding:36px}
+.playlist-title{font-family:var(--fd);font-size:2rem;font-weight:300;font-style:italic;color:var(--cream);margin-bottom:8px}
+.playlist-desc{font-size:.85rem;color:var(--muted);margin-bottom:28px;line-height:1.7}
+.track-list{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.track{display:flex;gap:14px;align-items:flex-start;padding:14px;background:var(--surface2);border-radius:var(--r12);border:1px solid var(--border)}
+.track-num{font-family:var(--fd);font-size:1.3rem;font-weight:300;color:var(--gold);opacity:.5;flex-shrink:0;width:28px;text-align:center;line-height:1.4}
+.track-info h4{font-family:var(--fd);font-size:1rem;font-weight:400;color:var(--cream);margin-bottom:2px}
+.track-artist{font-size:.75rem;color:var(--gold);margin-bottom:6px}
+.track-why{font-size:.78rem;color:var(--muted);line-height:1.6;font-style:italic}
+.track-search{display:inline-block;margin-top:8px;font-size:.72rem;color:var(--muted);text-decoration:none;background:var(--surface);border:1px solid var(--border);padding:4px 12px;border-radius:20px;transition:all .2s}
+.track-search:hover{border-color:var(--gold);color:var(--gold)}
+@media(max-width:600px){.form-card{padding:28px 20px}.form-row{grid-template-columns:1fr}.milestone-item{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}}
