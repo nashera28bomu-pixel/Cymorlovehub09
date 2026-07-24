@@ -1,285 +1,111 @@
-// ============================================
-// CYMOR LOVE HUB — CREATE PAGE JS
-// ============================================
+// CREATE PAGE JS
+const S={style:'Romantic',length:'Medium',language:'English',theme:'Rose Garden',musicType:'built-in',musicTrack:'soft-piano',musicFile:null,photos:[]};
 
-// State
-const state = {
-  currentStep: 1,
-  writingStyle: 'Romantic',
-  letterLength: 'Medium',
-  language: 'English',
-  theme: 'Rose Garden',
-  musicType: 'built-in',
-  musicTrack: 'soft-piano',
-  musicFile: null,
-  photoFiles: []
-};
-
-// ── STEP NAVIGATION ──────────────────────────
-function goToStep(n) {
-  if (n > state.currentStep && !validateStep(state.currentStep)) return;
-
-  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
-  document.getElementById(`step-${n}`).classList.add('active');
-  document.querySelectorAll('.nav-step').forEach(s => {
-    s.classList.toggle('active', parseInt(s.dataset.step) === n);
-  });
-  state.currentStep = n;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+// Step nav
+function goStep(n){
+  if(n>1&&!validate(n-1))return;
+  document.querySelectorAll('.step-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(n==='success'?'step-success':`step-${n}`).classList.add('active');
+  if(typeof n==='number'){
+    document.querySelectorAll('.step-dot').forEach((d,i)=>{
+      d.classList.toggle('active',i+1===n);
+      d.classList.toggle('done',i+1<n);
+    });
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function validateStep(step) {
-  if (step === 1) {
-    const sender = document.getElementById('senderName').value.trim();
-    const recipient = document.getElementById('recipientName').value.trim();
-    if (!sender || !recipient) {
-      alert('Please enter both your name and your partner\'s name.');
-      return false;
+function validate(step){
+  if(step===1){
+    if(!document.getElementById('senderName').value.trim()||!document.getElementById('recipientName').value.trim()){
+      alert('Please enter both names.');return false;
     }
   }
-  if (step === 2) {
-    const howMet = document.getElementById('howMet').value.trim();
-    if (!howMet) {
-      alert('Please share how you met — even a sentence helps the AI.');
-      return false;
-    }
+  if(step===2){
+    if(!document.getElementById('howMet').value.trim()){alert('Please share how you met.');return false;}
   }
   return true;
 }
 
-// ── CHIP SELECTORS ──────────────────────────
-function makeChipSelector(gridId, stateKey) {
-  document.getElementById(gridId).addEventListener('click', e => {
-    const chip = e.target.closest('[data-val]');
-    if (!chip) return;
-    document.querySelectorAll(`#${gridId} .style-chip`).forEach(c => c.classList.remove('selected'));
-    chip.classList.add('selected');
-    state[stateKey] = chip.dataset.val;
+// Chips
+makeChips('styleGrid','style',S);
+makeChips('lengthGrid','length',S);
+makeChips('langGrid','language',S);
+makeChips('musicGrid','musicTrack',S);
+makeThemes('themeGrid','theme',S);
+
+// Photos
+const photoZone=document.getElementById('photoZone');
+const photoInput=document.getElementById('photoInput');
+photoZone.addEventListener('click',()=>photoInput.click());
+photoZone.addEventListener('dragover',e=>{e.preventDefault();photoZone.classList.add('drag');});
+photoZone.addEventListener('dragleave',()=>photoZone.classList.remove('drag'));
+photoZone.addEventListener('drop',e=>{e.preventDefault();photoZone.classList.remove('drag');addPhotos([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')));});
+photoInput.addEventListener('change',()=>{addPhotos([...photoInput.files]);photoInput.value='';});
+
+function addPhotos(files){
+  const rem=10-S.photos.length;
+  S.photos.push(...files.slice(0,rem));
+  renderPhotos();
+}
+function removePhoto(i){S.photos.splice(i,1);renderPhotos();}
+function renderPhotos(){
+  const c=document.getElementById('photoPreviews');c.innerHTML='';
+  S.photos.forEach((f,i)=>{
+    const w=document.createElement('div');w.className='photo-wrap';
+    const img=document.createElement('img');img.src=URL.createObjectURL(f);
+    const btn=document.createElement('button');btn.className='photo-rm';btn.textContent='×';btn.onclick=()=>removePhoto(i);
+    w.appendChild(img);w.appendChild(btn);c.appendChild(w);
   });
+  photoZone.querySelector('p').textContent=S.photos.length>=10?'Maximum 10 photos reached':'Tap to add photos';
 }
 
-makeChipSelector('writingStyleGrid', 'writingStyle');
-makeChipSelector('letterLengthGrid', 'letterLength');
-makeChipSelector('languageGrid', 'language');
-
-document.getElementById('musicGrid').addEventListener('click', e => {
-  const chip = e.target.closest('[data-val]');
-  if (!chip) return;
-  document.querySelectorAll('#musicGrid .music-chip').forEach(c => c.classList.remove('selected'));
-  chip.classList.add('selected');
-  state.musicTrack = chip.dataset.val;
+// Music tabs
+function switchMusicTab(t){
+  document.querySelectorAll('.music-tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.music-panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById(`tab-${t}`).classList.add('on');
+  document.getElementById(`panel-${t}`).classList.add('on');
+  S.musicType=t==='bi'?'built-in':'upload';
+}
+const musicZone=document.getElementById('musicZone');
+const musicInput=document.getElementById('musicInput');
+musicZone.addEventListener('click',()=>musicInput.click());
+musicInput.addEventListener('change',()=>{
+  if(musicInput.files[0]){S.musicFile=musicInput.files[0];document.getElementById('musicFileName').textContent=`♪ ${musicInput.files[0].name}`;}
 });
 
-document.getElementById('themeGrid').addEventListener('click', e => {
-  const opt = e.target.closest('[data-val]');
-  if (!opt) return;
-  document.querySelectorAll('#themeGrid .theme-opt').forEach(o => o.classList.remove('selected'));
-  opt.classList.add('selected');
-  state.theme = opt.dataset.val;
-});
+// Generate
+async function generate(){
+  const btn=document.getElementById('genBtn');
+  const spinner=document.getElementById('genSpinner');
+  const txt=document.getElementById('genText');
+  const err=document.getElementById('genError');
+  err.textContent='';
 
-// ── PHOTO UPLOAD ──────────────────────────
-const photoZone = document.getElementById('photoZone');
-const photoInput = document.getElementById('photoInput');
-const photoPreviews = document.getElementById('photoPreviews');
+  const fd=new FormData();
+  const fields=['senderName','recipientName','occasion','relationshipDuration','nickname','favoritePlace','futureDream','firstDate','howMet','loveMost','favoriteMemory','secretThings','specialMoments','futureDreamsTogether','funnyMemory','promises','extraDetails'];
+  fields.forEach(f=>{const v=document.getElementById(f)?.value?.trim();if(v)fd.append(f,v);});
+  fd.append('writingStyle',S.style);fd.append('letterLength',S.length);
+  fd.append('language',S.language);fd.append('theme',S.theme);
+  fd.append('musicType',S.musicType);fd.append('musicTrack',S.musicTrack);
+  S.photos.forEach(f=>fd.append('images',f));
+  if(S.musicType==='upload'&&S.musicFile)fd.append('music',S.musicFile);
 
-photoZone.addEventListener('click', () => photoInput.click());
+  if(!fd.get('senderName')||!fd.get('recipientName')){err.textContent='Please go back and fill in the names.';return;}
 
-photoZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  photoZone.classList.add('dragover');
-});
+  btn.disabled=true;txt.textContent='Crafting your experience...';spinner.style.display='block';
 
-photoZone.addEventListener('dragleave', () => photoZone.classList.remove('dragover'));
-
-photoZone.addEventListener('drop', e => {
-  e.preventDefault();
-  photoZone.classList.remove('dragover');
-  addPhotos(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
-});
-
-photoInput.addEventListener('change', () => {
-  addPhotos(Array.from(photoInput.files));
-  photoInput.value = '';
-});
-
-function addPhotos(files) {
-  const remaining = 10 - state.photoFiles.length;
-  const toAdd = files.slice(0, remaining);
-  state.photoFiles.push(...toAdd);
-  renderPhotoThumbs();
-}
-
-function removePhoto(idx) {
-  state.photoFiles.splice(idx, 1);
-  renderPhotoThumbs();
-}
-
-function renderPhotoThumbs() {
-  photoPreviews.innerHTML = '';
-  state.photoFiles.forEach((file, idx) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'photo-thumb-wrap';
-    const img = document.createElement('img');
-    img.className = 'photo-thumb';
-    img.src = URL.createObjectURL(file);
-    img.alt = `Photo ${idx + 1}`;
-    const btn = document.createElement('button');
-    btn.className = 'photo-remove';
-    btn.textContent = '×';
-    btn.onclick = () => removePhoto(idx);
-    wrap.appendChild(img);
-    wrap.appendChild(btn);
-    photoPreviews.appendChild(wrap);
-  });
-  photoZone.querySelector('p').textContent = state.photoFiles.length >= 10 ? 'Maximum 10 photos reached' : 'Tap to add photos';
-}
-
-// ── MUSIC TABS ──────────────────────────
-function switchMusicTab(tab) {
-  document.querySelectorAll('.music-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.music-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`tab-${tab}`).classList.add('active');
-  document.getElementById(`panel-${tab}`).classList.add('active');
-  state.musicType = tab === 'builtin' ? 'built-in' : 'upload';
-}
-
-const musicZone = document.getElementById('musicZone');
-const musicInput = document.getElementById('musicInput');
-
-musicZone.addEventListener('click', () => musicInput.click());
-
-musicInput.addEventListener('change', () => {
-  if (musicInput.files[0]) {
-    state.musicFile = musicInput.files[0];
-    document.getElementById('musicFileName').textContent = `♪ ${musicInput.files[0].name}`;
+  try{
+    const res=await fetch('/api/experiences/generate/letter',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!res.ok||!data.success)throw new Error(data.error||'Generation failed.');
+    document.getElementById('shareUrl').value=data.shareUrl;
+    document.getElementById('previewBtn').href=data.shareUrl;
+    goStep('success');
+  }catch(e){
+    err.textContent=e.message;
+  }finally{
+    btn.disabled=false;txt.textContent='✦ Generate My Experience';spinner.style.display='none';
   }
-});
-
-// ── BACKGROUND CANVAS ──────────────────────────
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-let bgTime = 0;
-function drawBg() {
-  bgTime += 0.5;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const grad = ctx.createRadialGradient(
-    canvas.width * (0.3 + Math.sin(bgTime * 0.001) * 0.2),
-    canvas.height * 0.3, 0,
-    canvas.width * 0.5, canvas.height * 0.5,
-    canvas.width * 0.8
-  );
-  grad.addColorStop(0, 'rgba(120,40,80,0.15)');
-  grad.addColorStop(0.5, 'rgba(80,20,60,0.08)');
-  grad.addColorStop(1, 'rgba(8,8,16,0)');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  requestAnimationFrame(drawBg);
-}
-drawBg();
-
-// ── GENERATE ──────────────────────────────
-async function generateExperience() {
-  const btn = document.getElementById('generateBtn');
-  const spinner = document.getElementById('generateSpinner');
-  const btnText = document.getElementById('generateText');
-  const errorEl = document.getElementById('generateError');
-
-  errorEl.textContent = '';
-
-  // Collect all form data
-  const formData = new FormData();
-
-  const fields = [
-    'senderName','recipientName','occasion','relationshipDuration','nickname',
-    'favoritePlace','futureDream','firstDate','howMet','loveMost','favoriteMemory',
-    'secretThings','specialMoments','futureDreamsTogether','funnyMemory',
-    'promises','extraDetails'
-  ];
-
-  for (const f of fields) {
-    const el = document.getElementById(f);
-    if (el && el.value.trim()) formData.append(f, el.value.trim());
-  }
-
-  formData.append('writingStyle', state.writingStyle);
-  formData.append('letterLength', state.letterLength);
-  formData.append('language', state.language);
-  formData.append('theme', state.theme);
-  formData.append('musicType', state.musicType);
-  formData.append('musicTrack', state.musicTrack);
-
-  // Add photos
-  state.photoFiles.forEach(file => formData.append('images', file));
-
-  // Add music file
-  if (state.musicType === 'upload' && state.musicFile) {
-    formData.append('music', state.musicFile);
-  }
-
-  // Validate required
-  if (!formData.get('senderName') || !formData.get('recipientName')) {
-    errorEl.textContent = 'Please go back and fill in the names.';
-    return;
-  }
-
-  btn.disabled = true;
-  btnText.textContent = 'Crafting your experience...';
-  spinner.style.display = 'block';
-
-  try {
-    const res = await fetch('/api/letters/generate', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Generation failed. Please try again.');
-    }
-
-    // Show success
-    document.getElementById('shareUrl').value = data.shareUrl;
-    document.getElementById('previewBtn').href = data.shareUrl;
-    goToStep('success');
-
-  } catch (err) {
-    errorEl.textContent = err.message;
-  } finally {
-    btn.disabled = false;
-    btnText.textContent = '✦ Generate My Experience';
-    spinner.style.display = 'none';
-  }
-}
-
-function goToStep(n) {
-  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
-  if (n === 'success') {
-    document.getElementById('step-success').classList.add('active');
-  } else {
-    if (n > state.currentStep && !validateStep(state.currentStep)) return;
-    document.getElementById(`step-${n}`).classList.add('active');
-    document.querySelectorAll('.nav-step').forEach(s => {
-      s.classList.toggle('active', parseInt(s.dataset.step) === n);
-    });
-    state.currentStep = n;
-  }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function copyLink() {
-  const url = document.getElementById('shareUrl').value;
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy Link', 2000);
-  }).catch(() => {
-    document.getElementById('shareUrl').select();
-    document.execCommand('copy');
-  });
 }
