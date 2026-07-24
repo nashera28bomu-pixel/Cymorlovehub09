@@ -11,19 +11,12 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const isAudio =
-      file.mimetype.startsWith('audio/') ||
-      file.mimetype === 'video/mp4' ||
-      file.mimetype === 'video/ogg' ||
+    const isAudio = file.mimetype.startsWith('audio/') || file.mimetype.startsWith('video/') ||
       /\.(mp3|wav|m4a|ogg|oga|opus|aac|flac)$/i.test(file.originalname);
-
     return {
       folder: 'cymor-love-hub',
       resource_type: isAudio ? 'video' : 'image',
-      // 'video' resource_type handles all audio in Cloudinary
-      allowed_formats: isAudio
-        ? ['mp3', 'wav', 'm4a', 'mp4', 'ogg', 'oga', 'opus', 'aac', 'flac']
-        : ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+      allowed_formats: isAudio ? ['mp3','wav','m4a','mp4','ogg','oga','opus','aac','flac'] : ['jpg','jpeg','png','webp','gif'],
       transformation: isAudio ? [] : [{ quality: 'auto', fetch_format: 'auto' }]
     };
   }
@@ -33,14 +26,9 @@ const upload = multer({
   storage,
   limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const isImage = file.mimetype.startsWith('image/');
-    const isAudio =
-      file.mimetype.startsWith('audio/') ||
-      file.mimetype.startsWith('video/') ||
-      /\.(mp3|wav|m4a|ogg|oga|opus|aac|flac)$/i.test(file.originalname);
-
-    if (isImage || isAudio) cb(null, true);
-    else cb(new Error(`Unsupported file type: ${file.mimetype}`), false);
+    const ok = file.mimetype.startsWith('image/') || file.mimetype.startsWith('audio/') ||
+      file.mimetype.startsWith('video/') || /\.(mp3|wav|m4a|ogg|oga|opus|aac|flac)$/i.test(file.originalname);
+    ok ? cb(null, true) : cb(new Error(`Unsupported file type: ${file.mimetype}`), false);
   }
 });
 
