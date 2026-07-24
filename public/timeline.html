@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Anniversary Timeline — Cymor Love Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/global.css"/><link rel="stylesheet" href="/css/features.css"/>
+</head><body>
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+<nav class="nav scrolled"><div class="nav-inner"><a href="/" class="nav-logo">Cymor Love Hub</a><div class="nav-links"><a href="/create" class="nav-link">Letter</a><a href="/poem" class="nav-link">Poem</a><a href="/apology" class="nav-link">Apology</a><a href="/timeline" class="nav-link active">Timeline</a><a href="/proposal" class="nav-link">Proposal</a><a href="/quiz" class="nav-link">Quiz</a><a href="/playlist" class="nav-link">Playlist</a></div></div></nav>
+<div class="page-wrap">
+  <div class="page-head"><span class="page-icon">◉</span><h1 class="page-title">Anniversary Timeline</h1><p class="page-sub">Your love story as a cinematic scroll. Add your milestones and photos — AI narrates each chapter like a film.</p></div>
+  <div class="form-card"><div class="form-stack">
+    <div class="form-row">
+      <div class="field"><label>Your name *</label><input id="senderName" type="text" required placeholder="Your name"/></div>
+      <div class="field"><label>Their name *</label><input id="recipientName" type="text" required placeholder="Their name"/></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Together since</label><input id="startDate" type="text" placeholder="e.g. March 2021"/></div>
+      <div class="field"><label>Years/months together</label><input id="years" type="text" placeholder="e.g. 3 years 4 months"/></div>
+    </div>
+    <div class="field"><label>Language</label>
+      <div class="chips" id="langGrid">
+        <div class="chip on" data-val="English">English</div><div class="chip" data-val="Swahili">Swahili</div>
+        <div class="chip" data-val="French">Français</div><div class="chip" data-val="Spanish">Español</div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="form-card" style="margin-top:16px">
+    <h3>Your milestones</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:20px">Add the key moments in your story. AI will narrate each one.</p>
+    <div class="milestone-list" id="milestoneList"></div>
+    <button class="btn-add-milestone" onclick="addMilestone()">+ Add Milestone</button>
+  </div>
+
+  <div class="submit-area" style="margin-top:24px">
+    <button class="btn-generate" id="genBtn" onclick="generate()"><span id="genText">◉ Generate Our Timeline</span><div class="spinner" id="genSpinner" style="display:none"></div></button>
+    <div class="form-error" id="genError"></div>
+  </div>
+  <div id="successBox" style="display:none;margin-top:28px"><div class="success-box">
+    <span class="success-heart">◉</span><h2 class="success-title">Your timeline is ready</h2>
+    <p class="success-sub">Share this cinematic love story.</p>
+    <div class="share-row"><input id="shareUrl" type="text" readonly/><button class="btn-copy" id="copyBtn" onclick="copyLink('shareUrl','copyBtn')">Copy</button></div>
+    <a id="previewBtn" href="#" target="_blank" class="btn btn-gold" style="margin-top:16px;display:inline-flex">Open Timeline →</a>
+  </div></div>
+</div>
+<script src="/js/global.js"></script>
+<script>
+const S={language:'English'};makeChips('langGrid','language',S);
+let milestones=[];
+function addMilestone(){
+  const id=Date.now();
+  milestones.push({id,date:'',title:'',description:''});
+  renderMilestones();
+}
+function removeMilestone(id){milestones=milestones.filter(m=>m.id!==id);renderMilestones();}
+function renderMilestones(){
+  const c=document.getElementById('milestoneList');c.innerHTML='';
+  milestones.forEach((m,i)=>{
+    const el=document.createElement('div');el.className='milestone-item';
+    el.innerHTML=`
+      <input type="text" placeholder="Date (e.g. June 2021)" value="${m.date}" onchange="milestones[${i}].date=this.value"/>
+      <input type="text" placeholder="What happened?" value="${m.title}" onchange="milestones[${i}].title=this.value"/>
+      <button class="milestone-rm" onclick="removeMilestone(${m.id})">×</button>
+      <textarea placeholder="Describe this moment..." rows="2" style="grid-column:1/-1" onchange="milestones[${i}].description=this.value">${m.description}</textarea>
+    `;
+    c.appendChild(el);
+  });
+}
+// Start with 3 milestones
+addMilestone();addMilestone();addMilestone();
+
+async function generate(){
+  const btn=document.getElementById('genBtn'),sp=document.getElementById('genSpinner'),tx=document.getElementById('genText'),er=document.getElementById('genError');
+  er.textContent='';
+  if(!document.getElementById('senderName').value.trim()||!document.getElementById('recipientName').value.trim()){er.textContent='Please enter both names.';return;}
+  if(milestones.filter(m=>m.title).length===0){er.textContent='Please add at least one milestone.';return;}
+  const fd=new FormData();
+  ['senderName','recipientName','startDate','years'].forEach(f=>{const v=document.getElementById(f)?.value?.trim();if(v)fd.append(f,v);});
+  fd.append('language',S.language);
+  fd.append('milestones',JSON.stringify(milestones.filter(m=>m.title)));
+  btn.disabled=true;tx.textContent='Building your timeline...';sp.style.display='block';
+  try{
+    const res=await fetch('/api/experiences/generate/timeline',{method:'POST',body:fd});
+    const data=await res.json();if(!res.ok||!data.success)throw new Error(data.error||'Failed.');
+    document.getElementById('shareUrl').value=data.shareUrl;document.getElementById('previewBtn').href=data.shareUrl;
+    document.getElementById('successBox').style.display='block';document.getElementById('successBox').scrollIntoView({behavior:'smooth'});
+  }catch(e){er.textContent=e.message;}finally{btn.disabled=false;tx.textContent='◉ Generate Our Timeline';sp.style.display='none';}
+}
+</script>
+</body></html>

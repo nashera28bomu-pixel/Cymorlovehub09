@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Couple Name Generator — Cymor Love Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/global.css"/><link rel="stylesheet" href="/css/features.css"/>
+</head><body>
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+<nav class="nav scrolled"><div class="nav-inner">
+  <a href="/" class="nav-logo">Cymor Love Hub</a>
+  <div class="nav-links">
+    <a href="/create" class="nav-link">Letter</a><a href="/poem" class="nav-link">Poem</a>
+    <a href="/apology" class="nav-link">Apology</a><a href="/timeline" class="nav-link">Timeline</a>
+    <a href="/proposal" class="nav-link">Proposal</a><a href="/quiz" class="nav-link">Quiz</a>
+    <a href="/playlist" class="nav-link">Playlist</a><a href="/couplename" class="nav-link active">Name</a>
+  </div>
+</div></nav>
+
+<div class="page-wrap">
+  <div class="page-head">
+    <span class="page-icon">💑</span>
+    <h1 class="page-title">Couple Name Generator</h1>
+    <p class="page-sub">Put in your two names. AI creates unique couple names, explains what each one means, and picks the best one for you.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-stack">
+      <div class="form-row">
+        <div class="field"><label>First person's name *</label><input id="name1" type="text" placeholder="e.g. Brian"/></div>
+        <div class="field"><label>Second person's name *</label><input id="name2" type="text" placeholder="e.g. Amara"/></div>
+      </div>
+      <div class="field"><label>A word that describes you two (optional)</label><input id="vibe" type="text" placeholder="e.g. playful, soulmates, adventurous, fierce"/></div>
+      <div class="field"><label>How many name options?</label>
+        <div class="chips" id="countGrid">
+          <div class="chip" data-val="3">3 names</div>
+          <div class="chip on" data-val="5">5 names</div>
+          <div class="chip" data-val="8">8 names</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-area" style="margin-top:24px">
+    <button class="btn-generate" id="genBtn" onclick="generate()">
+      <span id="genText">💑 Generate Our Name</span>
+      <div class="spinner" id="genSpinner" style="display:none"></div>
+    </button>
+    <div class="form-error" id="genError"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="couple-result" id="coupleResult">
+    <p style="font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Your couple names</p>
+    <div id="coupleNamesList" class="couple-options"></div>
+    <div class="couple-names-display" id="selectedName">—</div>
+    <p class="couple-meaning" id="selectedMeaning"></p>
+    <p style="font-family:var(--fd);font-style:italic;font-size:.95rem;color:var(--muted);margin-bottom:20px" id="bestPick"></p>
+    <button class="btn btn-gold" onclick="copyCoupleName()">Copy Your Name 💑</button>
+    <p id="copyConfirm" style="font-size:.75rem;color:var(--gold);margin-top:10px;min-height:18px"></p>
+  </div>
+</div>
+
+<script src="/js/global.js"></script>
+<script>
+const S={count:'5'};
+makeChips('countGrid','count',S);
+
+let allNames=[];
+let selectedIdx=0;
+
+async function generate(){
+  const btn=document.getElementById('genBtn'),sp=document.getElementById('genSpinner');
+  const tx=document.getElementById('genText'),er=document.getElementById('genError');
+  const result=document.getElementById('coupleResult');
+  er.textContent='';result.style.display='none';
+
+  const n1=document.getElementById('name1').value.trim();
+  const n2=document.getElementById('name2').value.trim();
+  const vibe=document.getElementById('vibe').value.trim();
+
+  if(!n1||!n2){er.textContent='Please enter both names.';return;}
+
+  btn.disabled=true;tx.textContent='Creating your names...';sp.style.display='block';
+
+  try{
+    const res=await fetch('/api/couplename',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name1:n1,name2:n2,vibe,count:parseInt(S.count)})
+    });
+    const data=await res.json();
+    if(!res.ok||!data.success)throw new Error(data.error||'Failed.');
+
+    allNames=data.names;
+    renderResults(n1,n2,data.bestPick);
+  }catch(e){
+    er.textContent=e.message;
+  }finally{
+    btn.disabled=false;tx.textContent='💑 Generate Our Name';sp.style.display='none';
+  }
+}
+
+function renderResults(n1,n2,bestPick){
+  const list=document.getElementById('coupleNamesList');
+  list.innerHTML='';
+  allNames.forEach((item,i)=>{
+    const btn=document.createElement('button');
+    btn.className='couple-opt'+(i===0?' active':'');
+    btn.textContent=item.name;
+    btn.onclick=()=>selectName(i);
+    list.appendChild(btn);
+  });
+  selectName(0);
+  document.getElementById('bestPick').textContent=bestPick?`✦ AI's top pick: "${bestPick}"`:'';
+  document.getElementById('coupleResult').style.display='block';
+  document.getElementById('coupleResult').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function selectName(i){
+  selectedIdx=i;
+  document.querySelectorAll('.couple-opt').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('selectedName').textContent=allNames[i].name;
+  document.getElementById('selectedMeaning').textContent=allNames[i].meaning;
+}
+
+function copyCoupleName(){
+  const name=allNames[selectedIdx]?.name||'';
+  navigator.clipboard.writeText(name).then(()=>{
+    const c=document.getElementById('copyConfirm');
+    c.textContent=`"${name}" copied!`;
+    setTimeout(()=>c.textContent='',2500);
+  });
+}
+</script>
+</body></html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Love Poem — Cymor Love Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/global.css"/><link rel="stylesheet" href="/css/features.css"/>
+</head><body>
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+<nav class="nav scrolled"><div class="nav-inner"><a href="/" class="nav-logo">Cymor Love Hub</a><div class="nav-links"><a href="/create" class="nav-link">Letter</a><a href="/poem" class="nav-link active">Poem</a><a href="/apology" class="nav-link">Apology</a><a href="/timeline" class="nav-link">Timeline</a><a href="/proposal" class="nav-link">Proposal</a><a href="/quiz" class="nav-link">Quiz</a><a href="/playlist" class="nav-link">Playlist</a></div></div></nav>
+
+<div class="page-wrap">
+  <div class="page-head">
+    <span class="page-icon">✦</span>
+    <h1 class="page-title">Love Poem</h1>
+    <p class="page-sub">AI crafts a deeply personal poem in their voice. Romantic, lyrical, or funny — your call.</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-stack">
+      <div class="form-row">
+        <div class="field"><label>Your name *</label><input id="senderName" type="text" placeholder="Your name" required/></div>
+        <div class="field"><label>Their name *</label><input id="recipientName" type="text" placeholder="Their name" required/></div>
+      </div>
+      <div class="field"><label>Your story (the more detail the better)</label><textarea id="story" rows="5" placeholder="How you met, what you love about them, special memories, inside jokes, your dreams together..."></textarea></div>
+      <div class="field"><label>Mood</label>
+        <div class="chips" id="moodGrid">
+          <div class="chip on" data-val="Romantic">Romantic</div>
+          <div class="chip" data-val="Funny">Funny & Sweet</div>
+          <div class="chip" data-val="Deeply Emotional">Deeply Emotional</div>
+          <div class="chip" data-val="Playful">Playful</div>
+          <div class="chip" data-val="Nostalgic">Nostalgic</div>
+          <div class="chip" data-val="Hopeful">Hopeful</div>
+        </div>
+      </div>
+      <div class="field"><label>Rhyme style</label>
+        <div class="chips" id="rhymeGrid">
+          <div class="chip on" data-val="Free verse">Free verse</div>
+          <div class="chip" data-val="Rhyming couplets">Rhyming</div>
+          <div class="chip" data-val="Sonnet style">Sonnet</div>
+          <div class="chip" data-val="Haiku series">Haiku series</div>
+        </div>
+      </div>
+      <div class="field"><label>Language</label>
+        <div class="chips" id="langGrid">
+          <div class="chip on" data-val="English">English</div>
+          <div class="chip" data-val="Swahili">Swahili</div>
+          <div class="chip" data-val="French">Français</div>
+          <div class="chip" data-val="Spanish">Español</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <button class="btn-generate" id="genBtn" onclick="generate()">
+      <span id="genText">✦ Generate My Poem</span>
+      <div class="spinner" id="genSpinner" style="display:none"></div>
+    </button>
+    <div class="form-error" id="genError"></div>
+  </div>
+
+  <div id="successBox" style="display:none;margin-top:28px">
+    <div class="success-box">
+      <span class="success-heart">✦</span>
+      <h2 class="success-title">Your poem is ready</h2>
+      <p class="success-sub">Share this link with the one you love.</p>
+      <div class="share-row"><input id="shareUrl" type="text" readonly/><button class="btn-copy" id="copyBtn" onclick="copyLink('shareUrl','copyBtn')">Copy</button></div>
+      <a id="previewBtn" href="#" target="_blank" class="btn btn-gold" style="margin-top:16px;display:inline-flex">Open Poem →</a>
+    </div>
+  </div>
+</div>
+
+<script src="/js/global.js"></script>
+<script>
+const S={mood:'Romantic',rhyme:'Free verse',language:'English'};
+makeChips('moodGrid','mood',S);makeChips('rhymeGrid','rhyme',S);makeChips('langGrid','language',S);
+async function generate(){
+  const btn=document.getElementById('genBtn'),sp=document.getElementById('genSpinner'),tx=document.getElementById('genText'),er=document.getElementById('genError');
+  er.textContent='';
+  const fd=new FormData();
+  ['senderName','recipientName','story'].forEach(f=>{const v=document.getElementById(f)?.value?.trim();if(v)fd.append(f,v);});
+  fd.append('mood',S.mood);fd.append('rhymeStyle',S.rhyme);fd.append('language',S.language);
+  if(!fd.get('senderName')||!fd.get('recipientName')){er.textContent='Please enter both names.';return;}
+  btn.disabled=true;tx.textContent='Writing your poem...';sp.style.display='block';
+  try{
+    const res=await fetch('/api/experiences/generate/poem',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!res.ok||!data.success)throw new Error(data.error||'Failed.');
+    document.getElementById('shareUrl').value=data.shareUrl;
+    document.getElementById('previewBtn').href=data.shareUrl;
+    document.getElementById('successBox').style.display='block';
+    document.getElementById('successBox').scrollIntoView({behavior:'smooth'});
+  }catch(e){er.textContent=e.message;}
+  finally{btn.disabled=false;tx.textContent='✦ Generate My Poem';sp.style.display='none';}
+}
+</script>
+</body></html>

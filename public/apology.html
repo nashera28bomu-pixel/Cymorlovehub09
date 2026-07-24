@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Apology Experience — Cymor Love Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/global.css"/><link rel="stylesheet" href="/css/features.css"/>
+</head><body>
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+<nav class="nav scrolled"><div class="nav-inner"><a href="/" class="nav-logo">Cymor Love Hub</a><div class="nav-links"><a href="/create" class="nav-link">Letter</a><a href="/poem" class="nav-link">Poem</a><a href="/apology" class="nav-link active">Apology</a><a href="/timeline" class="nav-link">Timeline</a><a href="/proposal" class="nav-link">Proposal</a><a href="/quiz" class="nav-link">Quiz</a><a href="/playlist" class="nav-link">Playlist</a></div></div></nav>
+<div class="page-wrap">
+  <div class="page-head"><span class="page-icon">♥</span><h1 class="page-title">Apology Experience</h1><p class="page-sub">When sorry isn't enough. A sincere, cinematic healing message — specific to what happened, no generic lines.</p></div>
+  <div class="form-card"><div class="form-stack">
+    <div class="form-row">
+      <div class="field"><label>Your name *</label><input id="senderName" type="text" required placeholder="Your name"/></div>
+      <div class="field"><label>Their name *</label><input id="recipientName" type="text" required placeholder="Their name"/></div>
+    </div>
+    <div class="field"><label>How long have you been together?</label><input id="duration" type="text" placeholder="e.g. 2 years"/></div>
+    <div class="field"><label>What happened? *</label><textarea id="whatHappened" rows="4" placeholder="Describe what went wrong honestly. The AI will use this to make the apology specific and genuine..."></textarea></div>
+    <div class="field"><label>How are you feeling?</label><textarea id="feelings" rows="3" placeholder="Your genuine feelings — guilt, love, fear of losing them, regret..."></textarea></div>
+    <div class="field"><label>Promises you want to make</label><textarea id="promises" rows="3" placeholder="Specific commitments going forward..."></textarea></div>
+    <div class="field"><label>Language</label>
+      <div class="chips" id="langGrid">
+        <div class="chip on" data-val="English">English</div><div class="chip" data-val="Swahili">Swahili</div>
+        <div class="chip" data-val="French">Français</div><div class="chip" data-val="Spanish">Español</div>
+      </div>
+    </div>
+  </div></div>
+  <div class="submit-area">
+    <button class="btn-generate" id="genBtn" onclick="generate()"><span id="genText">♥ Generate Apology</span><div class="spinner" id="genSpinner" style="display:none"></div></button>
+    <div class="form-error" id="genError"></div>
+  </div>
+  <div id="successBox" style="display:none;margin-top:28px"><div class="success-box">
+    <span class="success-heart">♥</span><h2 class="success-title">Your apology is ready</h2>
+    <p class="success-sub">Send this link to them. Let it speak for you.</p>
+    <div class="share-row"><input id="shareUrl" type="text" readonly/><button class="btn-copy" id="copyBtn" onclick="copyLink('shareUrl','copyBtn')">Copy</button></div>
+    <a id="previewBtn" href="#" target="_blank" class="btn btn-gold" style="margin-top:16px;display:inline-flex">Open →</a>
+  </div></div>
+</div>
+<script src="/js/global.js"></script>
+<script>
+const S={language:'English'};makeChips('langGrid','language',S);
+async function generate(){
+  const btn=document.getElementById('genBtn'),sp=document.getElementById('genSpinner'),tx=document.getElementById('genText'),er=document.getElementById('genError');
+  er.textContent='';
+  const fd=new FormData();
+  ['senderName','recipientName','duration','whatHappened','feelings','promises'].forEach(f=>{const v=document.getElementById(f)?.value?.trim();if(v)fd.append(f,v);});
+  fd.append('language',S.language);
+  if(!fd.get('senderName')||!fd.get('recipientName')||!fd.get('whatHappened')){er.textContent='Please fill in the required fields.';return;}
+  btn.disabled=true;tx.textContent='Crafting your apology...';sp.style.display='block';
+  try{
+    const res=await fetch('/api/experiences/generate/apology',{method:'POST',body:fd});
+    const data=await res.json();if(!res.ok||!data.success)throw new Error(data.error||'Failed.');
+    document.getElementById('shareUrl').value=data.shareUrl;document.getElementById('previewBtn').href=data.shareUrl;
+    document.getElementById('successBox').style.display='block';document.getElementById('successBox').scrollIntoView({behavior:'smooth'});
+  }catch(e){er.textContent=e.message;}finally{btn.disabled=false;tx.textContent='♥ Generate Apology';sp.style.display='none';}
+}
+</script>
+</body></html>

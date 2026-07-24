@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Love Language Quiz — Cymor Love Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/global.css"/><link rel="stylesheet" href="/css/features.css"/>
+</head><body>
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+<nav class="nav scrolled"><div class="nav-inner"><a href="/" class="nav-logo">Cymor Love Hub</a><div class="nav-links"><a href="/create" class="nav-link">Letter</a><a href="/poem" class="nav-link">Poem</a><a href="/apology" class="nav-link">Apology</a><a href="/timeline" class="nav-link">Timeline</a><a href="/proposal" class="nav-link">Proposal</a><a href="/quiz" class="nav-link active">Quiz</a><a href="/playlist" class="nav-link">Playlist</a></div></div></nav>
+<div class="page-wrap">
+  <div class="page-head"><span class="page-icon">❋</span><h1 class="page-title">Love Language Quiz</h1><p class="page-sub">Both partners answer 6 questions. AI identifies your love languages, compatibility, and daily tips for your unique combination.</p></div>
+
+  <!-- NAMES FIRST -->
+  <div class="form-card" id="namesCard">
+    <div class="form-stack">
+      <div class="form-row">
+        <div class="field"><label>Person 1 name *</label><input id="name1" type="text" placeholder="First person's name"/></div>
+        <div class="field"><label>Person 2 name *</label><input id="name2" type="text" placeholder="Second person's name"/></div>
+      </div>
+      <div style="text-align:center;padding-top:8px">
+        <button class="btn btn-gold" onclick="startQuiz()">Start the Quiz →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quizSection" style="display:none">
+    <div class="quiz-progress" id="quizProgress"></div>
+    <div class="form-card">
+      <span class="person-tag" id="personTag"></span>
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-opts" id="quizOpts"></div>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div id="generateSection" style="display:none;text-align:center;padding-top:24px">
+    <div class="generate-hint" style="max-width:560px;margin:0 auto 24px">
+      <span class="hint-icon">❋</span>
+      Both of you have answered. AI will now analyse your love languages and compatibility.
+    </div>
+    <button class="btn-generate" id="genBtn" onclick="generate()"><span id="genText">❋ Reveal Our Love Languages</span><div class="spinner" id="genSpinner" style="display:none"></div></button>
+    <div class="form-error" id="genError"></div>
+  </div>
+
+  <div id="successBox" style="display:none;margin-top:28px"><div class="success-box">
+    <span class="success-heart">❋</span><h2 class="success-title">Your results are ready</h2>
+    <p class="success-sub">Share this with your partner.</p>
+    <div class="share-row"><input id="shareUrl" type="text" readonly/><button class="btn-copy" id="copyBtn" onclick="copyLink('shareUrl','copyBtn')">Copy</button></div>
+    <a id="previewBtn" href="#" target="_blank" class="btn btn-gold" style="margin-top:16px;display:inline-flex">See Results →</a>
+  </div></div>
+</div>
+<script src="/js/global.js"></script>
+<script>
+const QUESTIONS=[
+  {q:"When you feel most loved, what usually happened?",opts:["Someone told me they love and appreciate me","Someone gave me their undivided attention","Someone did something helpful without being asked","Someone gave me a thoughtful gift","Someone hugged or held my hand"]},
+  {q:"What would hurt you most in a relationship?",opts:["Being criticized or put down","Being ignored or not listened to","My partner never helps around the house","Forgetting important dates or occasions","Physical distance or lack of touch"]},
+  {q:"How do you most naturally show love?",opts:["Saying 'I love you' and giving compliments","Putting my phone down and truly listening","Doing chores, errands, or tasks for them","Bringing them small gifts or tokens","Lots of hugs, kisses, and physical closeness"]},
+  {q:"What makes a perfect day with your partner?",opts:["Deep conversations and heartfelt words","Quality time doing something together","They took care of something stressful for me","They surprised me with something thoughtful","Being physically close all day"]},
+  {q:"What do you wish your partner did more?",opts:["Tell me how they feel about me","Put their phone down and focus on me","Help me more without me asking","Remember small things and celebrate them","Be more affectionate physically"]},
+  {q:"When you're going through a hard time, what helps most?",opts:["Hearing 'I believe in you, I'm here'","Someone sitting with me and listening","Someone handling things so I can rest","A meaningful gesture or small gift","A long hug or physical comfort"]}
+];
+const LANGS=['Words of Affirmation','Quality Time','Acts of Service','Gift Giving','Physical Touch'];
+let currentPerson=1,currentQ=0,answers1=[],answers2=[];
+let name1='',name2='';
+
+function startQuiz(){
+  name1=document.getElementById('name1').value.trim();
+  name2=document.getElementById('name2').value.trim();
+  if(!name1||!name2){alert('Please enter both names.');return;}
+  document.getElementById('namesCard').style.display='none';
+  document.getElementById('quizSection').style.display='block';
+  renderProgress();renderQuestion();
+}
+function renderProgress(){
+  const total=QUESTIONS.length*2;
+  const done=(currentPerson===1?0:QUESTIONS.length)+currentQ;
+  const c=document.getElementById('quizProgress');c.innerHTML='';
+  for(let i=0;i<total;i++){const b=document.createElement('div');b.className='quiz-bar'+(i<done?' done':'');c.appendChild(b);}
+}
+function renderQuestion(){
+  document.getElementById('personTag').textContent=currentPerson===1?`${name1} — Answer honestly`:`${name2} — Your turn now`;
+  const q=QUESTIONS[currentQ];
+  document.getElementById('quizQ').textContent=q.q;
+  const opts=document.getElementById('quizOpts');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=o;
+    btn.onclick=()=>pickAnswer(i);opts.appendChild(btn);
+  });
+}
+function pickAnswer(i){
+  document.querySelectorAll('.quiz-opt').forEach(b=>b.classList.remove('picked'));
+  document.querySelectorAll('.quiz-opt')[i].classList.add('picked');
+  setTimeout(()=>{
+    if(currentPerson===1)answers1.push(i);else answers2.push(i);
+    currentQ++;
+    if(currentQ>=QUESTIONS.length){
+      if(currentPerson===1){currentPerson=2;currentQ=0;renderProgress();renderQuestion();}
+      else{document.getElementById('quizSection').style.display='none';document.getElementById('generateSection').style.display='block';}
+    }else{renderProgress();renderQuestion();}
+  },400);
+}
+async function generate(){
+  const btn=document.getElementById('genBtn'),sp=document.getElementById('genSpinner'),tx=document.getElementById('genText'),er=document.getElementById('genError');
+  er.textContent='';btn.disabled=true;tx.textContent='Analysing...';sp.style.display='block';
+  try{
+    const fd=new FormData();
+    fd.append('senderName',name1);fd.append('recipientName',name2);
+    fd.append('name1',name1);fd.append('name2',name2);
+    fd.append('answers1',JSON.stringify(answers1));fd.append('answers2',JSON.stringify(answers2));
+    const res=await fetch('/api/experiences/generate/quiz',{method:'POST',body:fd});
+    const data=await res.json();if(!res.ok||!data.success)throw new Error(data.error||'Failed.');
+    document.getElementById('shareUrl').value=data.shareUrl;document.getElementById('previewBtn').href=data.shareUrl;
+    document.getElementById('generateSection').style.display='none';
+    document.getElementById('successBox').style.display='block';document.getElementById('successBox').scrollIntoView({behavior:'smooth'});
+  }catch(e){er.textContent=e.message;}finally{btn.disabled=false;tx.textContent='❋ Reveal Our Love Languages';sp.style.display='none';}
+}
+</script>
+</body></html>
